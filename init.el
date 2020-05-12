@@ -45,7 +45,6 @@ There are two things you can do about this warning:
 
 (use-package neotree
   :ensure t
-  :after (all-the-icons)
   :bind ("<f8>" . 'neotree-toggle)  
   :config (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
 
@@ -65,18 +64,14 @@ There are two things you can do about this warning:
 
 (use-package typescript-mode
   :ensure t
-  :config (setq typescript-indent-level 2))
+  :after (flycheck company)
+  :config ((flycheck-mode +1)
+	   (company-mode +1)
+	   (setq typescript-indent-level 2)))
 
 (use-package web-mode
   :ensure t
-  :after (add-node-modules-path)
   :mode ("\\.jsx\\'" "\\.tsx\\'")
-  :hook
-  (web-mode . #'add-node-modules-path)
-  (web-mode . (lambda ()
-		      (when (or (string-equal "tsx" (file-name-extension buffer-file-name))
-				(string-equal "jsx" (file-name-extension buffer-file-name)))
-			(setup-tide-mode))))
   :config
   (setq web-mode-code-indent-offset 2)
   (setq web-mode-markup-indent-offset 2))
@@ -93,16 +88,22 @@ There are two things you can do about this warning:
 
 (use-package tide
   :ensure t
-  :after (web-mode typescript-mode js2-mode company flycheck)
-  :hook ((typescript-mode . #'setup-tide-mode)
-	 (js2-mode . #'setup-tide-mode))
+  :after (web-mode typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+	 (js2-mode . tide-setup)
+	 (web-mode . (lambda ()
+		      (when (or (string-equal "tsx" (file-name-extension buffer-file-name))
+				(string-equal "jsx" (file-name-extension buffer-file-name)))
+			(setup-tide-mode)))))
   :config
   (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
   (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append))
 
 ;; UI CONFIGURATION
 ;; Configure theme
-(load-theme 'tango-plus t)
+;; (load-theme 'tango-plus t)
+;; (load-theme 'spacemacs-dark t)
+(load-theme 'spacemacs-light t)
 
 ;; Configure line numbers
 (add-hook 'prog-mode-hook 'linum-mode)
@@ -128,7 +129,7 @@ There are two things you can do about this warning:
 
 ;; Set default frame size
 (add-to-list 'default-frame-alist '(height . 60))
-(add-to-list 'default-frame-alist '(width . 120))
+(add-to-list 'default-frame-alist '(width . 100))
 
 ;; DO NOT TOUCH
 (custom-set-variables
@@ -138,7 +139,7 @@ There are two things you can do about this warning:
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (add-node-modules-path neotree all-the-icons markdown-mode js2-mode ag tango-plus-theme magit company web-mode tide projectile use-package))))
+    (spacemacs-theme add-node-modules-path neotree all-the-icons markdown-mode js2-mode ag tango-plus-theme magit company web-mode tide projectile use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
