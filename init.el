@@ -35,22 +35,31 @@ There are two things you can do about this warning:
 ;; PACKAGE CONFIGURATION
 ;; Define tide setup function
 (defun setup-tide-mode ()
+  "Call Tide setup and enables eldoc, company and flycheck mode."
   (interactive)
   (tide-setup)
   (eldoc-mode +1)
   (company-mode +1)
   (flycheck-mode +1)
-  (tide-hl-identifier-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled)))
+  (tide-hl-identifier-mode +1))
 
 (use-package neotree
   :ensure t
-  :bind ("<f8>" . 'neotree-toggle)  
-  :config (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
+  :bind-keymap ("C-c t" . neotree-mode-map)
+  :bind (:map neotree-mode-map
+	      ("t" . neotree-toggle)
+	      ("f" . neotree-find))
+  :config
+  (setq neo-smart-open t)
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
 
 (use-package magit
   :ensure t
   :bind ("C-x g" . 'magit-status))
+
+(use-package flycheck
+  :ensure t
+  :hook (prog-mode . flycheck-mode))
 
 (use-package projectile
   :ensure t
