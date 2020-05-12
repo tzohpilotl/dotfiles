@@ -1,6 +1,10 @@
+;;; init.el --- Initialization file with programming configuration
+;;; Commentary:
+;; 
 ;; PACKAGE MANAGER CONFIGURATION
 ;; Configure package manager sources
 (require 'package)
+;;; Code:
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
@@ -17,14 +21,14 @@ There are two things you can do about this warning:
 ;; USABILITY CONFIGURATION
 ;; Define a shortcut to edit the this init file
 (defun find-user-init-file ()
-  "Edit the `user-init-file' in another window"
+  "Edit the `user-init-file' in another window."
   (interactive)
   (find-file user-init-file))
 (global-set-key (kbd "C-c i") #'find-user-init-file)
 
 ;; Define a shortcut to reload this init file
 (defun reload-user-init-file ()
-  "Reload the `user-init-file'"
+  "Reload the `user-init-file'."
   (interactive)
   (load-file user-init-file))
 (global-set-key (kbd "C-c r") #'reload-user-init-file)
@@ -74,9 +78,7 @@ There are two things you can do about this warning:
 (use-package typescript-mode
   :ensure t
   :after (flycheck company)
-  :config ((flycheck-mode +1)
-	   (company-mode +1)
-	   (setq typescript-indent-level 2)))
+  :config (setq typescript-indent-level 2))
 
 (use-package web-mode
   :ensure t
@@ -131,7 +133,7 @@ There are two things you can do about this warning:
 ;; Set font face
 (set-face-attribute 'default nil
 		    ;; :family "Pragmata Pro"
-		    :family "Monaco"		    
+		    :family "Monaco"
 		    :height 120
 		    :weight 'normal
 		    :width 'normal)
@@ -155,3 +157,5 @@ There are two things you can do about this warning:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(provide 'init)
+;;; init.el ends here
