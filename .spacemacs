@@ -31,17 +31,40 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     debug
+     dap
      yaml
      python
      scheme
-     ;; react
+     react
+     tide
+     (json :variables
+           json-backend 'lsp
+           json-fmt-tool 'prettier)
+     coffeescript
      (typescript :variables
-                 typescript-fmt-tool 'tide)
-     html
-     javascript
+                 typescript-fmt-tool 'prettier)
+     (html :variables
+           web-fmt-tool 'prettier
+           web-mode-engine-syntax-check 'flycheck)
+     (import-js)
+     (lsp :variables
+          lsp-lens-enable t)
+     (javascript :variables
+                 js2-basic-offset 2
+                 js-indent-level 2
+                 javascript-backend 'lsp
+                 javascript-lsp-linter nil
+                 javascript-repl 'nodejs
+                 javascript-import-tool 'import-js
+                 node-add-modules-path t
+                 javascript-fmt-tool 'prettier)
      helm
+     tern
      (auto-completion :variables
-                      auto-completion-enable-snippets-in-popup t)
+                      auto-completion-enable-snippets-in-popup t
+                      auto-completion-enable-snippets-in-popup t
+                      auto-completion-private-snippets-directory t)
      better-defaults
      emacs-lisp
      git
@@ -54,15 +77,11 @@ values."
      syntax-checking
      version-control
      )
-   ;; List of additional packages that will be installed without being
-   ;; wrapped in a layer. If you need some configuration for these
-   ;; packages, then consider creating a layer. You can also put the
-   ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(prettier-js org-beautify-theme tango-plus-theme minimal-light-theme)
+   dotspacemacs-additional-packages '(yasnippet-snippets prettier-js org-beautify-theme tango-plus-theme)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(company-tern)
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -130,19 +149,30 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(tango-plus
-                         minimal-light
+   dotspacemacs-themes '(spacemacs-dark
                          spacemacs-light
-                         spacemacs-dark)
-   ;; If non nil the cursor color matches the state color in GUI Emacs.
+                         solarized-light
+                         solarized-dark)
+
+   ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
+   ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
+   ;; first three are spaceline themes. `doom' is the doom-emacs mode-line.
+   ;; `vanilla' is default Emacs mode-line. `custom' is a user defined themes,
+   ;; refer to the DOCUMENTATION.org for more info on how to create your own
+   ;; spaceline theme. Value can be a symbol or list with additional properties.
+   ;; (default '(spacemacs :separator wave :separator-scale 1.5))
+   dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
+
+   ;; If non-nil the cursor color matches the state color in GUI Emacs.
+   ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("JetBrains Mono"
+   dotspacemacs-default-font '("Cascadia Code"
                                :size 14
                                :weight normal
                                :width normal
-                               :powerline-scale 1.5)
+                               :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -300,17 +330,19 @@ values."
    ))
 
 (defun dotspacemacs/user-init ()
-  "Initialization function for user code.
-It is called immediately after `dotspacemacs/init', before layer configuration
-executes.
- This function is mostly useful for variables that need to be set
-before packages are loaded. If you are unsure, you should try in setting them in
-`dotspacemacs/user-config' first."
-  )
+  (setq ns-auto-hide-menu-bar t)
+  (setq create-lockfiles nil)
+  (setq default-directory "~/")
+  (setq command-line-default-directory "~/")
+  (setq ispell-program-name "aspell")
+  (setq-default flycheck-disabled-checkers '(javascript-jshint)))
 
 (defun dotspacemacs/user-config ()
+  ;; OS configuration
+  (mac-auto-operator-composition-mode)
+
   ;; Org configuration
-  (global-set-key (kbd "SPC o r") 'org-refile)
+  ;; (global-set-key (kbd "SPC o r") 'org-refile)
   ;; Jump to a register with C-x r j
   (set-register ?w (cons 'file (concat org-directory "/work.org")))
   (set-register ?p (cons 'file (concat org-directory "/personal.org")))
@@ -334,19 +366,20 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; Readability configuration
   (add-hook 'org-mode-hook #'visual-line-mode)
   (add-hook 'text-mode-hook #'visual-line-mode)
-  (add-hook 'prog-mode-hook 'linum-mode)
+  ;; (add-hook 'prog-mode-hook 'linum-mode)
   (set-fill-column 80)
+
+  ;; Debug Adapter Protocol configuration
+  (require 'dap-node)
 
   ;; Web development configuration
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
-  (setq js2-basic-offset 2)
-  (setq js-indent-level 2)
   (setq-default typescript-indent-level 2)
-  (add-hook 'js2-mode-hook 'prettier-js-mode)
-  (add-hook 'web-mode-hook 'prettier-js-mode)
-  (add-hook 'typescript-mode-hook 'prettier-js-mode)
-  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+  ;; (add-hook 'js2-mode-hook 'prettier-js-mode)
+  ;; (add-hook 'web-mode-hook 'prettier-js-mode)
+  ;; (add-hook 'typescript-mode-hook 'prettier-js-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 
   ;; Tide for tsx
   (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file /tmp/tss.log"))
@@ -378,10 +411,40 @@ before packages are loaded. If you are unsure, you should try in setting them in
 "))))
  '(package-selected-packages
    (quote
-    (tango-plus-theme org-beautify-theme yaml-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js geiser web-mode tide typescript-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data xterm-color unfill shell-pop mwim multi-term helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck eshell-z eshell-prompt-extras esh-help company-tern dash-functional company-statistics company auto-yasnippet auto-dictionary ac-ispell auto-complete org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot mmm-mode markdown-toc markdown-mode gh-md web-beautify tern livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor yasnippet multiple-cursors js2-mode js-doc coffee-mode smeargle orgit magit-gitflow magit-popup helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter evil-magit magit transient git-commit with-editor diff-hl spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (tango-plus-theme org-beautify-theme yaml-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js geiser web-mode tide typescript-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data xterm-color unfill shell-pop mwim multi-term helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck eshell-z eshell-prompt-extras esh-help dash-functional company-statistics company auto-yasnippet auto-dictionary ac-ispell auto-complete org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot mmm-mode markdown-toc markdown-mode gh-md web-beautify tern livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor yasnippet multiple-cursors js2-mode js-doc coffee-mode smeargle orgit magit-gitflow magit-popup helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter evil-magit magit transient git-commit with-editor diff-hl spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
+ '(evil-want-Y-yank-to-eol nil)
+ '(org-capture-templates
+   '(("n" "A standard note with date" plain
+      (file "~/org/notes.org")
+      "%T
+
+")))
+ '(org-export-backends '(ascii html icalendar latex md odt confluence))
+ '(org-superstar-headline-bullets-list '(32))
+ '(package-selected-packages
+   '(dap-mode bui tango-plus-theme org-beautify-theme yaml-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js geiser web-mode tide typescript-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data xterm-color unfill shell-pop mwim multi-term helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck eshell-z eshell-prompt-extras esh-help dash-functional company-statistics company auto-yasnippet auto-dictionary ac-ispell auto-complete org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot mmm-mode markdown-toc markdown-mode gh-md web-beautify tern livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor yasnippet multiple-cursors js2-mode js-doc coffee-mode smeargle orgit magit-gitflow magit-popup helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter evil-magit magit transient git-commit with-editor diff-hl spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+)
