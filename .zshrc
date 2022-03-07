@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+ZSH_THEME="spaceship"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -104,3 +104,5 @@ alias gcmm='git commit -m'
 alias gaa='git add .'
 gri() { git rebase -i "HEAD~$1"; }
 alias gcl='git clone'
+alias gpu='git push'
+prepush() { git rpull origin main & try -P; }
