@@ -583,6 +583,8 @@ before packages are loaded."
           ("n" "Note" plain (file "~/org/notes.org")
            "%i%?\n")))
   (add-hook 'org-mode-hook 'smartparens-mode)
+  (add-hook 'org-mode-hook 'turn-on-auto-fill)
+  (custom-set-faces (if (not window-system) '(default ((t (:background "nil"))))))
 )
 
 
