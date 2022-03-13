@@ -32,30 +32,43 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(php
+   '(html
+     yaml
+     ruby
+     php
      (typescript :variables
+                 typescript-backend 'lsp
+                 typescript-lsp-linter nil
                  typescript-fmt-tool 'prettier
                  typescript-linter 'eslint)
-     javascript
+     (javascript :variables
+                 node-add-modules-path t
+                 js2-include-node-externs t
+                 js2-mode-show-strict-warnings t
+                 js2-mode-show-parse-errors t
+                 javascript-backend 'lsp
+                 javascript-fmt-tool 'prettier)
      auto-completion
      better-defaults
      emacs-lisp
      git
      helm
-     ;; lsp
+     lsp
      markdown
      multiple-cursors
      (org :variables
           org-enable-roam-support t
           org-directory "~/org"
           org-archive-location "~/org/archive/"
-          org-default-notes-file (concat org-directory "/notes.org"))
+          org-default-notes-file (concat org-directory "/notes.org")
+          org-enable-reveal-js-support t)
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
      version-control
+     osx
      treemacs)
 
 
@@ -252,8 +265,8 @@ It should only modify the values of Spacemacs settings."
    ;; Default font or prioritized list of fonts. The `:size' can be specified as
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
-   dotspacemacs-default-font '("Fira Code"
-                               :size 13.0
+   dotspacemacs-default-font '("Inconsolata"
+                               :size 15.0
                                :weight normal
                                :width normal)
 
@@ -566,6 +579,23 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+  (setq org-publish-project-alist
+        '(("blog-content"
+           :base-directory "~/blog/posts/"
+           :base-extension "org"
+           :publishing-function org-html-publish-to-html
+           :headline-levels 4
+           :html-extension "html"
+           :body-only t
+           :recursive t
+           :publishing-directory "~/blog/_posts/")
+          ("blog-assets"
+           :base-directory "~/blog/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
+           :publishing-directory "~/blog/"
+           :recursive t
+           :publishing-function org-publish-attachment)
+          ("blog" :components ("blog-assets" "blog-content"))))
   (setq org-roam-directory (file-truename "~/notes/zettelkasten"))
   (setq org-roam-dailies-directory "~/notes/journal/")
   (setq org-roam-dailies-capture-templates
@@ -585,6 +615,10 @@ before packages are loaded."
   (add-hook 'org-mode-hook 'smartparens-mode)
   (add-hook 'org-mode-hook 'turn-on-auto-fill)
   (custom-set-faces (if (not window-system) '(default ((t (:background "nil"))))))
+  (org-babel-do-load-languages 'org-babel-load-languages '((js . t)))
+  (setq-default js2-basic-offset 2
+                js-indent-level 2)
+  (setq-default typescript-indent-level 2)
 )
 
 
@@ -602,7 +636,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
-   '(mmm-mode markdown-toc gh-md flycheck-pos-tip pos-tip tide typescript-mode phpunit phpcbf php-extras php-auto-yasnippets geben drupal-mode company-phpactor phpactor composer php-runtime company-php ac-php-core xcscope php-mode org-roam yasnippet-snippets unfill mwim helm-company helm-c-yasnippet fuzzy auto-yasnippet ac-ispell auto-complete orgit-forge orgit org-rich-yank org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download org-contrib org-cliplink org helm-org-rifle gnuplot evil-org treemacs-magit smeargle helm-git-grep gitignore-templates git-timemachine git-modes git-messenger git-link git-gutter-fringe fringe-helper git-gutter forge yaml magit ghub closql emacsql-sqlite emacsql treepy magit-section git-commit with-editor transient browse-at-remote web-beautify tern prettier-js npm-mode nodejs-repl livid-mode skewer-mode js2-refactor yasnippet multiple-cursors js2-mode js-doc import-js grizzl impatient-mode htmlize simple-httpd helm-gtags ggtags dap-mode lsp-treemacs bui lsp-mode markdown-mode counsel-gtags counsel swiper ivy company add-node-modules-path ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen undo-tree treemacs-projectile treemacs-persp treemacs-icons-dired treemacs-evil treemacs cfrs pfuture posframe toc-org symon symbol-overlay string-inflection string-edit spaceline-all-the-icons memoize spaceline powerline restart-emacs request rainbow-delimiters quickrun popwin persp-mode password-generator paradox spinner overseer org-superstar open-junk-file nameless multi-line shut-up macrostep lorem-ipsum link-hint inspector info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile helm-org helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl flycheck-elsa flx-ido flx fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-easymotion evil-collection annalist evil-cleverparens smartparens evil-args evil-anzu anzu eval-sexp-fu emr iedit clang-format projectile paredit list-utils elisp-slime-nav elisp-def f editorconfig dumb-jump s drag-stuff dired-quick-sort devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol ht dash auto-compile packed all-the-icons aggressive-indent ace-window ace-link ace-jump-helm-line helm avy popup helm-core which-key use-package pcre2el hydra lv hybrid-mode font-lock+ evil goto-chg dotenv-mode diminish bind-map bind-key async)))
+   '(lsp-ui lsp-origami origami helm-lsp web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode counsel-css company-web web-completion-data yaml-mode seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake minitest enh-ruby-mode chruby bundler inf-ruby reveal-in-osx-finder osx-trash osx-dictionary osx-clipboard launchctl org-re-reveal mmm-mode markdown-toc gh-md flycheck-pos-tip pos-tip tide typescript-mode phpunit phpcbf php-extras php-auto-yasnippets geben drupal-mode company-phpactor phpactor composer php-runtime company-php ac-php-core xcscope php-mode org-roam yasnippet-snippets unfill mwim helm-company helm-c-yasnippet fuzzy auto-yasnippet ac-ispell auto-complete orgit-forge orgit org-rich-yank org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download org-contrib org-cliplink org helm-org-rifle gnuplot evil-org treemacs-magit smeargle helm-git-grep gitignore-templates git-timemachine git-modes git-messenger git-link git-gutter-fringe fringe-helper git-gutter forge yaml magit ghub closql emacsql-sqlite emacsql treepy magit-section git-commit with-editor transient browse-at-remote web-beautify tern prettier-js npm-mode nodejs-repl livid-mode skewer-mode js2-refactor yasnippet multiple-cursors js2-mode js-doc import-js grizzl impatient-mode htmlize simple-httpd helm-gtags ggtags dap-mode lsp-treemacs bui lsp-mode markdown-mode counsel-gtags counsel swiper ivy company add-node-modules-path ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen undo-tree treemacs-projectile treemacs-persp treemacs-icons-dired treemacs-evil treemacs cfrs pfuture posframe toc-org symon symbol-overlay string-inflection string-edit spaceline-all-the-icons memoize spaceline powerline restart-emacs request rainbow-delimiters quickrun popwin persp-mode password-generator paradox spinner overseer org-superstar open-junk-file nameless multi-line shut-up macrostep lorem-ipsum link-hint inspector info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile helm-org helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl flycheck-elsa flx-ido flx fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-easymotion evil-collection annalist evil-cleverparens smartparens evil-args evil-anzu anzu eval-sexp-fu emr iedit clang-format projectile paredit list-utils elisp-slime-nav elisp-def f editorconfig dumb-jump s drag-stuff dired-quick-sort devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol ht dash auto-compile packed all-the-icons aggressive-indent ace-window ace-link ace-jump-helm-line helm avy popup helm-core which-key use-package pcre2el hydra lv hybrid-mode font-lock+ evil goto-chg dotenv-mode diminish bind-map bind-key async)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
