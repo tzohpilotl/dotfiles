@@ -106,3 +106,8 @@ gri() { git rebase -i "HEAD~$1"; }
 alias gcl='git clone'
 alias gpu='git push'
 prepush() { git rpull origin main & try -P; }
+
+export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"  # Added by n-install (see http://git.io/n-install-repo).
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
