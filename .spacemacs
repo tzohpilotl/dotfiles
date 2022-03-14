@@ -32,21 +32,22 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(html
+   '((html :variables
+           web-fmt-tool 'prettier)
      yaml
      ruby
      php
+     tide
      (typescript :variables
-                 typescript-backend 'lsp
+                 typescript-backend 'tide
                  typescript-lsp-linter nil
                  typescript-fmt-tool 'prettier
                  typescript-linter 'eslint)
      (javascript :variables
-                 node-add-modules-path t
                  js2-include-node-externs t
                  js2-mode-show-strict-warnings t
                  js2-mode-show-parse-errors t
-                 javascript-backend 'lsp
+                 javascript-backend 'tide
                  javascript-fmt-tool 'prettier)
      auto-completion
      better-defaults
@@ -579,6 +580,8 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+  (add-to-list 'projectile-globally-ignored-directories "node_modules")
+  (setq-default node-add-modules-path t)
   (setq org-publish-project-alist
         '(("blog-content"
            :base-directory "~/blog/posts/"
@@ -591,7 +594,7 @@ before packages are loaded."
            :publishing-directory "~/blog/_posts/")
           ("blog-assets"
            :base-directory "~/blog/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
+           :base-extension "ico\\|css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
            :publishing-directory "~/blog/"
            :recursive t
            :publishing-function org-publish-attachment)
@@ -619,6 +622,9 @@ before packages are loaded."
   (setq-default js2-basic-offset 2
                 js-indent-level 2)
   (setq-default typescript-indent-level 2)
+  (setq-default web-mode-markup-indent-offset 2)
+  (setq-default web-mode-css-indent-offset 2)
+  (setq-default web-mode-code-indent-offset 2)
 )
 
 
