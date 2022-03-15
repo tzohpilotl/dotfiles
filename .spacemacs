@@ -44,6 +44,7 @@ This function should only modify configuration layer settings."
                  typescript-fmt-tool 'prettier
                  typescript-linter 'eslint)
      (javascript :variables
+                 node-add-modules-path t
                  js2-include-node-externs t
                  js2-mode-show-strict-warnings t
                  js2-mode-show-parse-errors t
@@ -87,7 +88,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(evil-terminal-cursor-changer)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -581,7 +582,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (add-to-list 'projectile-globally-ignored-directories "node_modules")
-  (setq-default node-add-modules-path t)
+  (eval-after-load 'typescript-mode '(add-hook 'typescript-mode-hook #'add-node-modules-path))
   (setq org-publish-project-alist
         '(("blog-content"
            :base-directory "~/blog/posts/"
