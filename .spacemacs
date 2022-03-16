@@ -36,7 +36,8 @@ This function should only modify configuration layer settings."
            web-fmt-tool 'prettier)
      yaml
      ruby
-     php
+     (php :variables
+          php-backend 'lsp)
      tide
      (typescript :variables
                  typescript-backend 'tide
