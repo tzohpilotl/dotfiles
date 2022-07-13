@@ -105,6 +105,7 @@ alias gaa='git add .'
 gri() { git rebase -i "HEAD~$1"; }
 alias gcl='git clone'
 alias gpu='git push'
+alias pwa-chrome=/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="/Users/mgil/Library/Application Support/Google/Chrome/Profile 5"
 prepush() { git rpull origin main & try -P; }
 
 export N_PREFIX="$HOME/n"; [[ :$PATH: == *":$N_PREFIX/bin:"* ]] || PATH+=":$N_PREFIX/bin"  # Added by n-install (see http://git.io/n-install-repo).

@@ -32,7 +32,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(react
+   '(osx
+     react
      sql
      (html :variables
            web-fmt-tool 'prettier)
@@ -74,7 +75,6 @@ This function should only modify configuration layer settings."
      ;; spell-checking
      syntax-checking
      version-control
-     osx
      treemacs)
 
 
@@ -614,15 +614,18 @@ before packages are loaded."
            "* %?"
            :target (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%Y-%m-%d>\n"))))
+  (setq org-agenda-files '("~/org/todo.org"))
   (setq org-capture-templates
-        '(("t" "Todo" item (file "~/org/todo.org")
-           "* TODO %?\n  %i\n  %a")
+        '(("t" "Todo" entry (file+datetree "~/org/todo.org")
+           "* TODO %?%i\n CREATED: %U\n")
           ("j" "Journal" entry (file+datetree "~/org/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a")
           ("o" "Outline" entry (file "~/org/notes.org")
            "*  %?\n")
           ("n" "Note" plain (file "~/org/notes.org")
-           "%i%?\n")))
+           "%i%?\n")
+          ("w" "Work Diary" plain (file+datetree "~/org/work.org")
+           "\n%U %?\n" :tree-type month)))
   (add-hook 'org-mode-hook 'smartparens-mode)
   (add-hook 'org-mode-hook 'turn-on-auto-fill)
   (custom-set-faces (if (not window-system) '(default ((t (:background "nil"))))))
@@ -656,6 +659,5 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:background "nil"))))
  '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
 )
